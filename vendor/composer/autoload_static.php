@@ -22,8 +22,10 @@ class ComposerStaticInita9e6a1bfefa73086c637139911324b4b
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Websimple\\WpTypesense\\API' => __DIR__ . '/../..' . '/includes/API.php',
         'Websimple\\WpTypesense\\Bootstrap' => __DIR__ . '/../..' . '/includes/Bootstrap.php',
         'Websimple\\WpTypesense\\Settings' => __DIR__ . '/../..' . '/includes/Settings.php',
+        'Websimple\\WpTypesense\\WPCLI' => __DIR__ . '/../..' . '/includes/WPCLI.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

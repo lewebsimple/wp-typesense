@@ -2,8 +2,6 @@
 
 namespace Websimple\WpTypesense;
 
-use Websimple\WpTypesense\Settings;
-
 class Bootstrap {
 	
   /**
@@ -27,7 +25,9 @@ class Bootstrap {
 
 	public function init_plugin() {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
+		API::get_instance();
 		Settings::get_instance();
+		WPCLI::get_instance();
 	}
 
 	public function load_textdomain() {

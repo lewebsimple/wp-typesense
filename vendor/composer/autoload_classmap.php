@@ -7,6 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'Websimple\\WpTypesense\\API' => $baseDir . '/includes/API.php',
     'Websimple\\WpTypesense\\Bootstrap' => $baseDir . '/includes/Bootstrap.php',
     'Websimple\\WpTypesense\\Settings' => $baseDir . '/includes/Settings.php',
+    'Websimple\\WpTypesense\\WPCLI' => $baseDir . '/includes/WPCLI.php',
 );
