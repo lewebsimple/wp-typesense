@@ -1,4 +1,14 @@
 {
   "name": "lewebsimple/wp-typesense",
-  "type": "wordpress-plugin"
+  "type": "wordpress-plugin",
+  "autoload": {
+    "psr-4": {
+      "Websimple\\WpTypesense\\": "includes/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "prefer-stable": true
 }
