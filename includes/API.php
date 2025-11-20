@@ -102,4 +102,12 @@ class API {
   static function version() {
     return self::get_instance()->request( 'debug' )['version'] ?? null;
   }
+
+	/**
+	 * List all collections
+	 * @return mixed
+	 */
+	static function collection_list() {
+		return self::get_instance()->request( 'collections' );
+	}
 }

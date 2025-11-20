@@ -22,6 +22,7 @@ class WPCLI {
 
   public function register_commands() {
 		WP_CLI::add_command( 'typesense info', array( $this, 'info' ), );
+		WP_CLI::add_command( 'typesense collection list', array( $this, 'collection_list' ), );
 	}
 
   public function info() {
@@ -32,6 +33,27 @@ class WPCLI {
       WP_CLI::success( 'Typesense server is healthy.' );
       WP_CLI::line( sprintf( 'Server URL:     %s', Settings::get_server_url() ) );
       WP_CLI::line( sprintf( 'Server version: %s', API::version() ) );
+    }
+  }
+
+  public function collection_list() {
+    $collections = API::collection_list();
+    if ( is_wp_error( $collections ) ) {
+      WP_CLI::error( sprintf( 'Failed to retrieve collections: %s', $collections->get_error_message() ) );
+    } else {
+      if ( empty( $collections ) ) {
+        WP_CLI::line( 'No collections found.' );
+      } else {
+        $items = array();
+        foreach ( $collections as $collection ) {
+          $items[] = array(
+            'name' => $collection['name'],
+            'fields' => count( $collection['fields'] ),
+            'num_documents' => $collection['num_documents'],
+          );
+        }
+        WP_CLI\Utils\format_items( 'table', $items, array( 'name', 'fields', 'num_documents' ) );
+      }
     }
   }
 
