@@ -2,6 +2,7 @@
 
 namespace Websimple\WpTypesense;
 
+use Exception;
 use WP_CLI;
 
 class WPCLI {
@@ -26,21 +27,19 @@ class WPCLI {
 	}
 
   public function info() {
-    $health = API::health();
-    if ( is_wp_error( $health ) ) {
-      WP_CLI::error( sprintf( 'Typesense server is not healthy: %s', $health->get_error_message() ) );
-    } else {
+    try {
+      API::get_client()->getHealth();
       WP_CLI::success( 'Typesense server is healthy.' );
       WP_CLI::line( sprintf( 'Server URL:     %s', Settings::get_server_url() ) );
-      WP_CLI::line( sprintf( 'Server version: %s', API::version() ) );
+      WP_CLI::line( sprintf( 'Server version: %s', API::version()  ) );
+     } catch( Exception $e) {
+      WP_CLI::error( sprintf( 'Typesense server is not healthy: %s', $e->getMessage() ) );
+     }
     }
-  }
 
   public function collection_list() {
-    $collections = API::collection_list();
-    if ( is_wp_error( $collections ) ) {
-      WP_CLI::error( sprintf( 'Failed to retrieve collections: %s', $collections->get_error_message() ) );
-    } else {
+    try {
+      $collections = API::get_client()->collections->retrieve();
       if ( empty( $collections ) ) {
         WP_CLI::line( 'No collections found.' );
       } else {
@@ -54,6 +53,8 @@ class WPCLI {
         }
         WP_CLI\Utils\format_items( 'table', $items, array( 'name', 'fields', 'num_documents' ) );
       }
+    } catch( Exception $e) {
+      WP_CLI::error( sprintf( 'Failed to retrieve collections: %s', $e->getMessage() ) );
     }
   }
 

@@ -8,9 +8,17 @@
   },
   "config": {
     "optimize-autoloader": true,
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
   },
   "prefer-stable": true,
+  "require": {
+    "php-http/curl-client": "*",
+    "symfony/http-client": "*",
+    "typesense/typesense-php": "*"
+  },
   "require-dev": {
     "php-stubs/wp-cli-stubs": "*"
   }

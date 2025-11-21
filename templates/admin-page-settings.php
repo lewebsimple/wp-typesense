@@ -41,7 +41,8 @@ $readonly = array(
         </th>
         <td>
           <?php
-          if ( $version = \Websimple\WpTypesense\API::version() ) {
+          if ( \Websimple\WpTypesense\API::healthy() ) {
+            $version = \Websimple\WpTypesense\API::version();
             echo "<p style='color:green;'>Connected to Typesense server (version $version)</p>";
           } else {
             echo '<p style="color:red;">Could not connect to Typesense server. Please check your settings.</p>';
