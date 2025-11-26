@@ -5,9 +5,11 @@ namespace Websimple\WpTypesense;
 use Exception;
 use WP_CLI;
 
+/**
+ * WP-CLI commands class for WP Typesense
+ */
 class WPCLI {
- 
-  /**
+	/**
 	 * Singleton instance
 	 *
 	 * @var WPCLI $instance
@@ -17,45 +19,44 @@ class WPCLI {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
-  public function __construct() {
+	public function __construct() {
 		add_action( 'cli_init', array( $this, 'register_commands' ) );
 	}
 
-  public function register_commands() {
+	public function register_commands() {
 		WP_CLI::add_command( 'typesense info', array( $this, 'info' ), );
 		WP_CLI::add_command( 'typesense collection list', array( $this, 'collection_list' ), );
 	}
 
-  public function info() {
-    try {
-      API::get_client()->getHealth();
-      WP_CLI::success( 'Typesense server is healthy.' );
-      WP_CLI::line( sprintf( 'Server URL:     %s', Settings::get_server_url() ) );
-      WP_CLI::line( sprintf( 'Server version: %s', API::version()  ) );
-     } catch( Exception $e) {
-      WP_CLI::error( sprintf( 'Typesense server is not healthy: %s', $e->getMessage() ) );
-     }
-    }
+	public function info() {
+		try {
+			API::get_client()->getHealth();
+			WP_CLI::success( 'Typesense server is healthy.' );
+			WP_CLI::line( sprintf( 'Server URL:     %s', Settings::get_server_url() ) );
+			WP_CLI::line( sprintf( 'Server version: %s', API::version() ) );
+		} catch ( Exception $e ) {
+			WP_CLI::error( sprintf( 'Typesense server is not healthy: %s', $e->getMessage() ) );
+		}
+	}
 
-  public function collection_list() {
-    try {
-      $collections = API::get_client()->collections->retrieve();
-      if ( empty( $collections ) ) {
-        WP_CLI::line( 'No collections found.' );
-      } else {
-        $items = array();
-        foreach ( $collections as $collection ) {
-          $items[] = array(
-            'name' => $collection['name'],
-            'fields' => count( $collection['fields'] ),
-            'num_documents' => $collection['num_documents'],
-          );
-        }
-        WP_CLI\Utils\format_items( 'table', $items, array( 'name', 'fields', 'num_documents' ) );
-      }
-    } catch( Exception $e) {
-      WP_CLI::error( sprintf( 'Failed to retrieve collections: %s', $e->getMessage() ) );
-    }
-  }
-
+	public function collection_list() {
+		try {
+			$collections = API::get_client()->collections->retrieve();
+			if ( empty( $collections ) ) {
+				WP_CLI::line( 'No collections found.' );
+			} else {
+				$items = array();
+				foreach ( $collections as $collection ) {
+					$items[] = array(
+						'name'          => $collection['name'],
+						'fields'        => count( $collection['fields'] ),
+						'num_documents' => $collection['num_documents'],
+					);
+				}
+				WP_CLI\Utils\format_items( 'table', $items, array( 'name', 'fields', 'num_documents' ) );
+			}
+		} catch ( Exception $e ) {
+			WP_CLI::error( sprintf( 'Failed to retrieve collections: %s', $e->getMessage() ) );
+		}
+	}
 }

@@ -635,6 +635,7 @@ class ComposerStaticInita9e6a1bfefa73086c637139911324b4b
         'Websimple\\WpTypesense\\API' => __DIR__ . '/../..' . '/includes/API.php',
         'Websimple\\WpTypesense\\Bootstrap' => __DIR__ . '/../..' . '/includes/Bootstrap.php',
         'Websimple\\WpTypesense\\Hooks' => __DIR__ . '/../..' . '/includes/Hooks.php',
+        'Websimple\\WpTypesense\\Schemas' => __DIR__ . '/../..' . '/includes/Schemas.php',
         'Websimple\\WpTypesense\\Settings' => __DIR__ . '/../..' . '/includes/Settings.php',
         'Websimple\\WpTypesense\\WPCLI' => __DIR__ . '/../..' . '/includes/WPCLI.php',
     );

@@ -9,7 +9,11 @@ use Typesense\Client;
  * Typesense API integration class
  */
 class API {
-
+	/**
+	 * Typesense client
+	 *
+	 * @var Client $client
+	 */
 	private Client $client;
 
 	/**
@@ -23,38 +27,39 @@ class API {
 	}
 
 	public function __construct() {
-		$url_parts = parse_url(Settings::get_server_url());
-		$this->client = new Client([
-			'api_key'         => Settings::get_admin_api_key(),
-			'nodes'           => [
-				[
-					'host'     => $url_parts['host'],
-					'port'     => $url_parts['port'] ?? 443,
-					'protocol' => $url_parts['scheme'],
-				],
-			],
-		]);
+		$url_parts    = wp_parse_url( Settings::get_server_url() );
+		$this->client = new Client(
+			array(
+				'api_key' => Settings::get_admin_api_key(),
+				'nodes'   => array(
+					array(
+						'host'     => $url_parts['host'],
+						'port'     => $url_parts['port'] ?? 443,
+						'protocol' => $url_parts['scheme'],
+					),
+				),
+			)
+		);
 	}
 
-	static function get_client(): Client {
+	public static function get_client(): Client {
 		return self::get_instance()->client;
 	}
 
-	static function healthy(): bool {
+	public static function healthy(): bool {
 		try {
 			$health = self::get_client()->getHealth()->retrieve();
-			return ($health['ok'] ?? null) === true;
-		} catch (Exception $e) {
+			return ( $health['ok'] ?? null ) === true;
+		} catch ( Exception $e ) {
 			return false;
 		}
 	}
 
-	static function version() {
+	public static function version() {
 		try {
 			return self::get_client()->getDebug()->retrieve()['version'];
-		} catch(Exception $e) {
+		} catch ( Exception $e ) {
 			return '(unknown)';
 		}
 	}
-
 }

@@ -490,6 +490,7 @@ return array(
     'Websimple\\WpTypesense\\API' => $baseDir . '/includes/API.php',
     'Websimple\\WpTypesense\\Bootstrap' => $baseDir . '/includes/Bootstrap.php',
     'Websimple\\WpTypesense\\Hooks' => $baseDir . '/includes/Hooks.php',
+    'Websimple\\WpTypesense\\Schemas' => $baseDir . '/includes/Schemas.php',
     'Websimple\\WpTypesense\\Settings' => $baseDir . '/includes/Settings.php',
     'Websimple\\WpTypesense\\WPCLI' => $baseDir . '/includes/WPCLI.php',
 );

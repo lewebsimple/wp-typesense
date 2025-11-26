@@ -3,10 +3,9 @@
 namespace Websimple\WpTypesense;
 
 /**
- * Typesense settings menu, pages and fields.
+ * WP Typesense settings menu, pages and fields.
  */
 class Settings {
-
 	/**
 	 * Singleton instance
 	 *
@@ -48,15 +47,15 @@ class Settings {
 		return $links;
 	}
 
-	static function get_server_url() {
-		return defined('WP_TYPESENSE_SERVER_URL') ? constant('WP_TYPESENSE_SERVER_URL') : get_option( 'wp_typesense_server_url', '' );
+	public static function get_server_url() {
+		return defined( 'WP_TYPESENSE_SERVER_URL' ) ? constant( 'WP_TYPESENSE_SERVER_URL' ) : get_option( 'wp_typesense_server_url', '' );
 	}
 
-	static function get_admin_api_key() {
-		return defined('WP_TYPESENSE_ADMIN_API_KEY') ? constant('WP_TYPESENSE_ADMIN_API_KEY') : get_option( 'wp_typesense_admin_api_key', '' );
+	public static function get_admin_api_key() {
+		return defined( 'WP_TYPESENSE_ADMIN_API_KEY' ) ? constant( 'WP_TYPESENSE_ADMIN_API_KEY' ) : get_option( 'wp_typesense_admin_api_key', '' );
 	}
 
-	static function get_search_api_key() {
-		return defined('WP_TYPESENSE_SEARCH_API_KEY') ? constant('WP_TYPESENSE_SEARCH_API_KEY') : get_option( 'wp_typesense_search_api_key', '' );
+	public static function get_search_api_key() {
+		return defined( 'WP_TYPESENSE_SEARCH_API_KEY' ) ? constant( 'WP_TYPESENSE_SEARCH_API_KEY' ) : get_option( 'wp_typesense_search_api_key', '' );
 	}
 }
