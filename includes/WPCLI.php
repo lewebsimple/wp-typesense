@@ -27,6 +27,7 @@ class WPCLI {
 		WP_CLI::add_command( 'typesense info', array( $this, 'info' ), );
 		WP_CLI::add_command( 'typesense collection drop', array( $this, 'collection_drop' ), );
 		WP_CLI::add_command( 'typesense collection list', array( $this, 'collection_list' ), );
+		WP_CLI::add_command( 'typesense collection prune', array( $this, 'collection_prune' ), );
 	}
 
 	public function info() {
@@ -71,6 +72,18 @@ class WPCLI {
 			}
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Failed to retrieve collections: %s', $e->getMessage() ) );
+		}
+	}
+
+	public function collection_prune( $args ) {
+		if ( empty( $collection_name = $args[0] ?? '' ) ) {
+			WP_CLI::error( 'Collection name is required.' );
+		}
+		try {
+			$deleted_count = Document::prune_collection( $collection_name );
+			WP_CLI::success( sprintf( 'Pruned %d documents from collection "%s" successfully.', $deleted_count, $collection_name ) );
+		} catch ( Exception $e ) {
+			WP_CLI::error( sprintf( 'Failed to prune collection: %s', $e->getMessage() ) );
 		}
 	}
 }

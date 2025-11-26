@@ -62,4 +62,18 @@ class API {
 			return '(unknown)';
 		}
 	}
+
+	public static function jsonl_decode( string $jsonl ): array {
+		$results = array();
+		foreach ( preg_split( '/\R/', $jsonl ) as $line ) {
+			$line = trim( $line );
+			if ( $line === '' ) { continue;
+			}
+			$obj = json_decode( $line, true );
+			if ( is_array( $obj ) ) {
+				$results[] = $obj;
+			}
+		}
+		return $results;
+	}
 }

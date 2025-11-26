@@ -91,4 +91,36 @@ class Document {
 		$documents_jsonl = implode( "\n", array_map( 'wp_json_encode', $documents ) );
 		API::get_client()->collections[ $collection_name ]->documents->import( $documents_jsonl, array( 'action' => 'upsert' ) );
 	}
+
+	public static function prune_collection( $collection_name ) {
+		$documents           = API::jsonl_decode( API::get_client()->collections[ $collection_name ]->documents->export() );
+		$delete_document_ids = array();
+		foreach ( $documents as $document ) {
+			if ( ! isset( $document['id'] ) ) {
+				continue;
+			}
+			$decoded = self::decode_document_id( $document['id'] );
+			switch ( $decoded['entity_type'] ) {
+				case 'post':
+					if ( ! in_array( get_post_status( $decoded['entity_id'] ), apply_filters( 'wp_typesense_indexed_post_status', array( 'publish' ) ) ) ) {
+						$delete_document_ids[] = $document['id'];
+					}
+					break;
+				case 'term':
+					$term = get_term( $decoded['entity_id'] );
+					if ( ! $term || is_wp_error( $term ) ) {
+						$delete_document_ids[] = $document['id'];
+					}
+					break;
+				default:
+					$delete_document_ids[] = $document['id'];
+					break;
+			}
+		}
+		if ( empty( $delete_document_ids ) ) {
+			return 0;
+		}
+		API::get_client()->collections[ $collection_name ]->documents->delete( array( 'filter_by' => sprintf( 'id:[%s]', implode( ',', $delete_document_ids ) ) ) );
+		return count( $delete_document_ids );
+	}
 }
