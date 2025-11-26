@@ -50,14 +50,12 @@ class Schemas {
 			}
 
 			// Map post types and taxonomies to collections
-			foreach ( $schema['post_types'] ?? array() as $post_type ) {
+			foreach ( $schema['metadata']['post_types'] ?? array() as $post_type ) {
 				$this->post_types_map[ $post_type ][] = $collection_name;
 			}
-			unset( $schema['post_types'] );
-			foreach ( $schema['taxonomies'] ?? array() as $taxonomy ) {
+			foreach ( $schema['metadata']['taxonomies'] ?? array() as $taxonomy ) {
 				$this->taxonomies_map[ $taxonomy ][] = $collection_name;
 			}
-			unset( $schema['taxonomies'] );
 
 			// Make sure ID field is present
 			if ( ! in_array( 'id', array_column( $schema['fields'], 'name' ) ) ) {
@@ -112,7 +110,10 @@ class Schemas {
 				$existing = $collections[ $key ];
 
 				// Prepare update schema (only add new fields and drop removed fields
-				$update_schema         = array( 'fields' => array() );
+				$update_schema = array( 'fields' => array() );
+				if ( ! empty( $schema['metadata'] ) ) {
+					$update_schema['metadata'] = $schema['metadata'];
+				}
 				$existing_fields_names = array_column( $existing['fields'], 'name' );
 				$new_fields_names      = array_column( $schema['fields'], 'name' );
 				foreach ( $schema['fields'] as $field ) {
