@@ -21,5 +21,6 @@ define( 'WP_TYPESENSE_BASENAME', plugin_basename( __FILE__ ) );
 define( 'WP_TYPESENSE_VERSION', '0.2.2' );
 define( 'WP_TYPESENSE_ROOT_DIR_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'WP_TYPESENSE_ROOT_DIR_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
+define( 'WP_TYPESENSE_BATCH_SIZE', 100 );
 
 require_once WP_TYPESENSE_ROOT_DIR_PATH . '/includes/Bootstrap.php';

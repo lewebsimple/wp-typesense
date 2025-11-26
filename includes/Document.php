@@ -136,8 +136,7 @@ class Document {
 					'posts_per_page' => -1,
 				)
 			);
-			// TODO: Convert to as_enqueue_async_action
-			do_action(
+			self::batch_process(
 				'wp_typesense_bulk_upsert',
 				array(
 					'collection_name' => $collection_name,
@@ -155,8 +154,7 @@ class Document {
 					'fields'     => 'ids',
 				)
 			);
-			// TODO: Convert to as_enqueue_async_action
-			do_action(
+			self::batch_process(
 				'wp_typesense_bulk_upsert',
 				array(
 					'collection_name' => $collection_name,
@@ -167,5 +165,15 @@ class Document {
 			$reindexed_count += count( $term_ids );
 		}
 		return $reindexed_count;
+	}
+
+	private static function batch_process( $hook, $data ) {
+		foreach ( array_chunk( $data, WP_TYPESENSE_BATCH_SIZE ) as $batch ) {
+			if ( function_exists( 'as_enqueue_async_action' ) ) {
+				as_enqueue_async_action( $hook, array( $batch ) );
+			} else {
+				do_action( $hook, $batch );
+			}
+		}
 	}
 }
