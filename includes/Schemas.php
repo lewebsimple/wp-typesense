@@ -151,7 +151,7 @@ class Schemas {
 					);
 				}
 			);
-			return new \WP_Error( 'wp_typesense_api', $e->getMessage() );
+			return new \WP_Error( 'sync_schema_error', $e->getMessage() );
 		}
 	}
 }

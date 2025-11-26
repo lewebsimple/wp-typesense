@@ -634,6 +634,7 @@ class ComposerStaticInita9e6a1bfefa73086c637139911324b4b
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'Websimple\\WpTypesense\\API' => __DIR__ . '/../..' . '/includes/API.php',
         'Websimple\\WpTypesense\\Bootstrap' => __DIR__ . '/../..' . '/includes/Bootstrap.php',
+        'Websimple\\WpTypesense\\Document' => __DIR__ . '/../..' . '/includes/Document.php',
         'Websimple\\WpTypesense\\Hooks' => __DIR__ . '/../..' . '/includes/Hooks.php',
         'Websimple\\WpTypesense\\Schemas' => __DIR__ . '/../..' . '/includes/Schemas.php',
         'Websimple\\WpTypesense\\Settings' => __DIR__ . '/../..' . '/includes/Settings.php',

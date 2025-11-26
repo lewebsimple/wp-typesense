@@ -489,6 +489,7 @@ return array(
     'ValueError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     'Websimple\\WpTypesense\\API' => $baseDir . '/includes/API.php',
     'Websimple\\WpTypesense\\Bootstrap' => $baseDir . '/includes/Bootstrap.php',
+    'Websimple\\WpTypesense\\Document' => $baseDir . '/includes/Document.php',
     'Websimple\\WpTypesense\\Hooks' => $baseDir . '/includes/Hooks.php',
     'Websimple\\WpTypesense\\Schemas' => $baseDir . '/includes/Schemas.php',
     'Websimple\\WpTypesense\\Settings' => $baseDir . '/includes/Settings.php',

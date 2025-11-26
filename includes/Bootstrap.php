@@ -28,6 +28,7 @@ class Bootstrap {
 	public function init_plugin() {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 		API::get_instance();
+		Document::get_instance();
 		Hooks::get_instance();
 		Schemas::get_instance();
 		Settings::get_instance();
