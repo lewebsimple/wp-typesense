@@ -3,11 +3,11 @@
         'name' => 'lewebsimple/wp-typesense',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'a73eeaec21c0deee119bcdc5ff954194c041faa1',
+        'reference' => 'c308149b5e8bc1c03fb646e55196c1ad25049500',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => false,
+        'dev' => true,
     ),
     'versions' => array(
         'clue/stream-filter' => array(
@@ -22,7 +22,7 @@
         'lewebsimple/wp-typesense' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'a73eeaec21c0deee119bcdc5ff954194c041faa1',
+            'reference' => 'c308149b5e8bc1c03fb646e55196c1ad25049500',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -119,6 +119,24 @@
             'install_path' => __DIR__ . '/../php-http/promise',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'php-stubs/wordpress-stubs' => array(
+            'pretty_version' => 'v6.8.3',
+            'version' => '6.8.3.0',
+            'reference' => 'abeb5a8b58fda7ac21f15ee596f302f2959a7114',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-stubs/wordpress-stubs',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
+        'php-stubs/wp-cli-stubs' => array(
+            'pretty_version' => 'v2.12.0',
+            'version' => '2.12.0.0',
+            'reference' => 'af16401e299a3fd2229bd0fa9a037638a4174a9d',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../php-stubs/wp-cli-stubs',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'psr/container' => array(
             'pretty_version' => '2.0.2',
