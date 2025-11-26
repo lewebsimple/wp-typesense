@@ -16,6 +16,10 @@ class Document {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
+	public function __construct() {
+		add_action( 'wp_typesense_bulk_upsert', array( $this, 'bulk_upsert' ) );
+	}
+
 	/**
 	 * Encode document ID
 	 *
@@ -49,12 +53,12 @@ class Document {
 	 * Get document data
 	 *
 	 * @param string $collection_name Collection name.
-	 * @param string $entity_type Entity type (post / term / user).
+	 * @param string $entity_type Entity type (post / term).
 	 * @param int    $entity_id Entity ID.
 	 *
 	 * @return array
 	 */
-	public function get_document_data( $collection_name, $entity_type, $entity_id ) {
+	public static function get_document_data( $collection_name, $entity_type, $entity_id ) {
 		$document = apply_filters(
 			'wp_typesense_document',
 			array(),
@@ -67,7 +71,24 @@ class Document {
 		if ( empty( $document ) ) {
 			return new \WP_Error( 'empty_document', 'Document data is empty' );
 		}
-		$document['id'] = $this->encode_document_id( $collection_name, $entity_type, $entity_id );
+		$document['id'] = self::encode_document_id( $collection_name, $entity_type, $entity_id );
 		return $document;
+	}
+
+	public function bulk_upsert( $data ) {
+		$collection_name = $data['collection_name'] ?? false;
+		$entity_type     = $data['entity_type'] ?? false;
+		$entity_ids      = $data['entity_ids'] ?? array();
+		if ( ! $collection_name || ! $entity_type || empty( $entity_ids ) ) {
+			return;
+		}
+		$documents       = array_map(
+			function ( $entity_id ) use ( $collection_name, $entity_type ) {
+				return Document::get_instance()->get_document_data( $collection_name, $entity_type, $entity_id );
+			},
+			$entity_ids
+		);
+		$documents_jsonl = implode( "\n", array_map( 'wp_json_encode', $documents ) );
+		API::get_client()->collections[ $collection_name ]->documents->import( $documents_jsonl, array( 'action' => 'upsert' ) );
 	}
 }

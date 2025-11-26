@@ -3,7 +3,7 @@
         'name' => 'lewebsimple/wp-typesense',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '813ff6d8834f53391167a071491d36d64fdf0214',
+        'reference' => 'a73eeaec21c0deee119bcdc5ff954194c041faa1',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'lewebsimple/wp-typesense' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '813ff6d8834f53391167a071491d36d64fdf0214',
+            'reference' => 'a73eeaec21c0deee119bcdc5ff954194c041faa1',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

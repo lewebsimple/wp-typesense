@@ -28,13 +28,6 @@ class Schemas {
 	 */
 	private array $taxonomies_map = array();
 
-	/**
-	 * User roles collections map
-	 *
-	 * @var array $user_roles_map
-	 */
-	private array $user_roles_map = array();
-
 
 	/**
 	 * Singleton instance
@@ -56,7 +49,7 @@ class Schemas {
 				throw new \Exception( 'Collection name must match schema name' );
 			}
 
-			// Map post types, taxonomies and user roles to collections
+			// Map post types and taxonomies to collections
 			foreach ( $schema['post_types'] ?? array() as $post_type ) {
 				$this->post_types_map[ $post_type ][] = $collection_name;
 			}
@@ -65,10 +58,6 @@ class Schemas {
 				$this->taxonomies_map[ $taxonomy ][] = $collection_name;
 			}
 			unset( $schema['taxonomies'] );
-			foreach ( $schema['user_roles'] ?? array() as $user_role ) {
-				$this->user_roles_map[ $user_role ][] = $collection_name;
-			}
-			unset( $schema['user_roles'] );
 
 			// Make sure ID field is present
 			if ( ! in_array( 'id', array_column( $schema['fields'], 'name' ) ) ) {
@@ -87,6 +76,16 @@ class Schemas {
 			}
 			$this->schemas[ $collection_name ] = $schema;
 		}
+	}
+
+	public static function get_post_collections( $post_id ) {
+		$post_type = get_post_type( $post_id );
+		return self::get_instance()->post_types_map[ $post_type ] ?? array();
+	}
+
+	public static function get_term_collections( $term_id ) {
+		$taxonomy = get_term( $term_id )->taxonomy ?? '';
+		return self::get_instance()->taxonomies_map[ $taxonomy ] ?? array();
 	}
 
 	private function sync_schema( $schema ) {
