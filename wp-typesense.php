@@ -3,7 +3,7 @@
  * Plugin Name: WP Typesense
  * Plugin URI: https://github.com/lewebsimple/wp-typesense
  * Description: Low-level Typesense integration for WordPress.
- * Version: 0.2.1
+ * Version: 0.2.2
  * Author: Pascal Martineau <pascal@lewebsimple.ca>
  * Author URI: https://websimple.com
  * License: MIT
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'WP_TYPESENSE_BASENAME', plugin_basename( __FILE__ ) );
-define( 'WP_TYPESENSE_VERSION', '0.2.1' );
+define( 'WP_TYPESENSE_VERSION', '0.2.2' );
 define( 'WP_TYPESENSE_ROOT_DIR_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'WP_TYPESENSE_ROOT_DIR_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
 
