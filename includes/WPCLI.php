@@ -28,6 +28,7 @@ class WPCLI {
 		WP_CLI::add_command( 'typesense collection drop', array( $this, 'collection_drop' ), );
 		WP_CLI::add_command( 'typesense collection list', array( $this, 'collection_list' ), );
 		WP_CLI::add_command( 'typesense collection prune', array( $this, 'collection_prune' ), );
+		WP_CLI::add_command( 'typesense collection reindex', array( $this, 'collection_reindex' ), );
 	}
 
 	public function info() {
@@ -84,6 +85,18 @@ class WPCLI {
 			WP_CLI::success( sprintf( 'Pruned %d documents from collection "%s" successfully.', $deleted_count, $collection_name ) );
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Failed to prune collection: %s', $e->getMessage() ) );
+		}
+	}
+
+	public function collection_reindex( $args ) {
+		if ( empty( $collection_name = $args[0] ?? '' ) ) {
+			WP_CLI::error( 'Collection name is required.' );
+		}
+		try {
+			$reindexed_count = Document::reindex_collection( $collection_name );
+			WP_CLI::success( sprintf( 'Reindexed %d documents from collection "%s" successfully.', $reindexed_count, $collection_name ) );
+		} catch ( Exception $e ) {
+			WP_CLI::error( sprintf( 'Failed to reindex collection: %s', $e->getMessage() ) );
 		}
 	}
 }

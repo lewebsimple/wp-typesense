@@ -123,4 +123,49 @@ class Document {
 		API::get_client()->collections[ $collection_name ]->documents->delete( array( 'filter_by' => sprintf( 'id:[%s]', implode( ',', $delete_document_ids ) ) ) );
 		return count( $delete_document_ids );
 	}
+
+	public static function reindex_collection( $collection_name ) {
+		$collection      = API::get_client()->collections["demo_posts"]->retrieve();
+		$reindexed_count = 0;
+		foreach ( $collection['metadata']['post_types'] ?? array() as $post_type ) {
+			$post_ids = get_posts(
+				array(
+					'post_type'      => $post_type,
+					'post_status'    => apply_filters( 'wp_typesense_indexed_post_status', array( 'publish' ) ),
+					'fields'         => 'ids',
+					'posts_per_page' => -1,
+				)
+			);
+			// TODO: Convert to as_enqueue_async_action
+			do_action(
+				'wp_typesense_bulk_upsert',
+				array(
+					'collection_name' => $collection_name,
+					'entity_type'     => 'post',
+					'entity_ids'      => $post_ids,
+				),
+			);
+			$reindexed_count += count( $post_ids );
+		}
+		foreach ( $collection['metadata']['taxonomies'] ?? array() as $taxonomy ) {
+			$term_ids = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				)
+			);
+			// TODO: Convert to as_enqueue_async_action
+			do_action(
+				'wp_typesense_bulk_upsert',
+				array(
+					'collection_name' => $collection_name,
+					'entity_type'     => 'term',
+					'entity_ids'      => $term_ids,
+				),
+			);
+			$reindexed_count += count( $term_ids );
+		}
+		return $reindexed_count;
+	}
 }
