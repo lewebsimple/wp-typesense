@@ -25,6 +25,7 @@ class WPCLI {
 
 	public function register_commands() {
 		WP_CLI::add_command( 'typesense info', array( $this, 'info' ), );
+		WP_CLI::add_command( 'typesense collection drop', array( $this, 'collection_drop' ), );
 		WP_CLI::add_command( 'typesense collection list', array( $this, 'collection_list' ), );
 	}
 
@@ -36,6 +37,19 @@ class WPCLI {
 			WP_CLI::line( sprintf( 'Server version: %s', API::version() ) );
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Typesense server is not healthy: %s', $e->getMessage() ) );
+		}
+	}
+
+	public function collection_drop( $args ) {
+		if ( empty( $collection_name = $args[0] ?? '' ) ) {
+			WP_CLI::error( 'Collection name is required.' );
+		}
+		try {
+			delete_option( "wp_typesense_schema_{$collection_name}" );
+			API::get_client()->collections[ $collection_name ]->delete();
+			WP_CLI::success( sprintf( 'Collection "%s" dropped successfully.', $collection_name ) );
+		} catch ( Exception $e ) {
+			WP_CLI::error( sprintf( 'Failed to drop collection "%s": %s', $collection_name, $e->getMessage() ) );
 		}
 	}
 
