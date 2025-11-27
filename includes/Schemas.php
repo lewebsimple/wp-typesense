@@ -180,7 +180,7 @@ class Schemas {
 
 			return $result;
 		} catch ( \Exception $e ) {
-			Bootstrap::admin_notice( sprintf( __( 'Error synchronizing schema for collection "%1$s": %2$s', 'wp-typesense' ), $collection_name, $e->getMessage() ) );
+			Notice::error( sprintf( __( 'Error synchronizing schema for collection "%1$s": %2$s', 'wp-typesense' ), $collection_name, $e->getMessage() ) );
 			return new \WP_Error( 'sync_schema_error', $e->getMessage() );
 		}
 	}

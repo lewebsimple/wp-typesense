@@ -46,6 +46,7 @@ class Bootstrap {
 		Collection::get_instance();
 		Document::get_instance();
 		Hooks::get_instance();
+		Notice::get_instance();
 		Schemas::get_instance();
 		Settings::get_instance();
 		WPCLI::get_instance();
@@ -56,23 +57,6 @@ class Bootstrap {
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'wp-typesense', false, dirname( WP_TYPESENSE_BASENAME ) . '/languages' );
-	}
-
-	/**
-	 * Display an admin notice with the given message
-	 *
-	 * @param string $message The message to display.
-	 */
-	public static function admin_notice( $message ) {
-		if ( ! is_admin() ) {
-			return;
-		}
-		add_action(
-			'admin_notices',
-			function () use ( $message ) {
-				echo '<div class="notice notice-error"><p><strong>WP Typesense error</strong>:' . esc_html( $message ) . '</p></div>';
-			}
-		);
 	}
 }
 
