@@ -109,7 +109,7 @@ class WPCLI {
 			WP_CLI::error( 'Collection name is required.' );
 		}
 		try {
-			$deleted_count = Collection::prune( $collection_name );
+			$deleted_count = Collection::get_instance()->prune( $collection_name );
 			WP_CLI::success( sprintf( 'Pruned %d documents from collection "%s" successfully.', $deleted_count, $collection_name ) );
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Failed to prune collection: %s', $e->getMessage() ) );
@@ -126,7 +126,7 @@ class WPCLI {
 			WP_CLI::error( 'Collection name is required.' );
 		}
 		try {
-			$reindexed_count = Collection::reindex( $collection_name );
+			$reindexed_count = Collection::get_instance()->reindex( $collection_name );
 			WP_CLI::success( sprintf( 'Reindexed %d documents from collection "%s" successfully.', $reindexed_count, $collection_name ) );
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Failed to reindex collection: %s', $e->getMessage() ) );

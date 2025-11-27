@@ -109,6 +109,7 @@ class Notice {
 	 */
 	public static function error( $message ) {
 		self::add_notice( $message, 'error' );
+		error_log( 'WP Typesense Error: ' . $message ); // @phpcs:ignore
 	}
 
 	/**

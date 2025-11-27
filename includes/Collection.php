@@ -27,27 +27,61 @@ class Collection {
 	 * Initialize collection hooks
 	 */
 	public function __construct() {
-		add_action( 'wp_typesense_bulk_upsert', array( $this, 'bulk_upsert' ), 10, 2 );
+		add_action( 'wp_typesense_bulk_delete', array( $this, 'bulk_delete' ), 10, 2 );
+		add_action( 'wp_typesense_bulk_upsert', array( $this, 'bulk_upsert' ), 10, 3 );
 	}
 
-
 	/**
-	 * Bulk upsert documents to Typesense
+	 * Bulk delete documents from Typesense, batching if necessary
 	 *
-	 * @param array $entity_ids Entity IDs.
-	 * @param array $args Additional arguments: collection_name, entity_type.
+	 * @param array  $document_ids Document IDs.
+	 * @param string $collection_name Collection name.
 	 */
-	public function bulk_upsert( $entity_ids, $args ) {
-		if ( empty( $args['collection_name'] ) || empty( $args['entity_type'] ) || empty( $entity_ids ) ) {
+	public function bulk_delete( $document_ids, $collection_name ) {
+		// Process in batches if exceeding batch size.
+		if ( count( $document_ids ) > WP_TYPESENSE_BATCH_SIZE ) {
+			$this->batch_process( 'wp_typesense_bulk_delete', $document_ids, $collection_name );
 			return;
 		}
-		$documents = array_map(
-			function ( $entity_id ) use ( $args ) {
-				return Document::get_instance()->get_data( $args['collection_name'], $args['entity_type'], $entity_id );
-			},
-			$entity_ids
+		$filter_by = sprintf( 'id:[%s]', implode( ',', $document_ids ) );
+		try {
+			API::get_client()->collections[ $collection_name ]->documents->delete( array( 'filter_by' => $filter_by ) );
+		} catch ( \Typesense\Exceptions\TypesenseClientError $e ) {
+			Notice::error( sprintf( __( 'Bulk delete error: %s', 'wp-typesense' ), $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Bulk upsert documents to Typesense, batching if necessary
+	 *
+	 * @param array  $entity_ids Entity IDs.
+	 * @param string $entity_type Entity type.
+	 * @param string $collection_name Collection name.
+	 */
+	public function bulk_upsert( $entity_ids, $entity_type, $collection_name ) {
+		// Process in batches if exceeding batch size.
+		if ( count( $entity_ids ) > WP_TYPESENSE_BATCH_SIZE ) {
+			$this->batch_process( 'wp_typesense_bulk_upsert', $entity_ids, $entity_type, $collection_name );
+			return;
+		}
+		$documents = array_filter(
+			array_map(
+				function ( $entity_id ) use ( $entity_type, $collection_name ) {
+					$document = Document::get_data( $collection_name, $entity_type, $entity_id );
+					return is_wp_error( $document ) ? null : $document;
+				},
+				$entity_ids
+			)
 		);
-		API::get_client()->collections[ $args['collection_name'] ]->documents->import( API::jsonl_encode( $documents ), array( 'action' => 'upsert' ) );
+		if ( empty( $documents ) ) {
+			Notice::warning( __( 'No valid documents to import', 'wp-typesense' ) );
+			return;
+		}
+		try {
+			API::get_client()->collections[ $collection_name ]->documents->import( API::jsonl_encode( $documents ), array( 'action' => 'upsert' ) );
+		} catch ( \Typesense\Exceptions\TypesenseClientError $e ) {
+			Notice::error( sprintf( __( 'Bulk upsert error: %s', 'wp-typesense' ), $e->getMessage() ) );
+		}
 	}
 
 	/**
@@ -57,9 +91,10 @@ class Collection {
 	 *
 	 * @return int Number of deleted documents.
 	 */
-	public static function prune( $collection_name ) {
-		$documents           = API::jsonl_decode( API::get_client()->collections[ $collection_name ]->documents->export() );
-		$delete_document_ids = array();
+	public function prune( $collection_name ) {
+			// TODO: Export in pages to handle large collections.
+			$documents           = API::jsonl_decode( API::get_client()->collections[ $collection_name ]->documents->export() );
+			$delete_document_ids = array();
 		foreach ( $documents as $document ) {
 			if ( ! isset( $document['id'] ) ) {
 				continue;
@@ -85,7 +120,7 @@ class Collection {
 		if ( empty( $delete_document_ids ) ) {
 			return 0;
 		}
-		API::get_client()->collections[ $collection_name ]->documents->delete( array( 'filter_by' => sprintf( 'id:[%s]', implode( ',', $delete_document_ids ) ) ) );
+		$this->bulk_delete( $delete_document_ids, $collection_name );
 		return count( $delete_document_ids );
 	}
 
@@ -96,7 +131,7 @@ class Collection {
 	 *
 	 * @return int Number of reindexed documents.
 	 */
-	public static function reindex( $collection_name ) {
+	public function reindex( $collection_name ) {
 		$collection      = API::get_client()->collections[ $collection_name ]->retrieve();
 		$reindexed_count = 0;
 		foreach ( $collection['metadata']['post_types'] ?? array() as $post_type ) {
@@ -108,14 +143,10 @@ class Collection {
 					'posts_per_page' => -1,
 				)
 			);
-			self::batch_process(
-				'wp_typesense_bulk_upsert',
-				$post_ids,
-				array(
-					'collection_name' => $collection_name,
-					'entity_type'     => 'post',
-				),
-			);
+			if ( is_wp_error( $post_ids ) || ! is_array( $post_ids ) ) {
+				continue;
+			}
+			$this->bulk_upsert( $post_ids, 'post', $collection_name );
 			$reindexed_count += count( $post_ids );
 		}
 		foreach ( $collection['metadata']['taxonomies'] ?? array() as $taxonomy ) {
@@ -126,14 +157,10 @@ class Collection {
 					'fields'     => 'ids',
 				)
 			);
-			self::batch_process(
-				'wp_typesense_bulk_upsert',
-				$term_ids,
-				array(
-					'collection_name' => $collection_name,
-					'entity_type'     => 'term',
-				),
-			);
+			if ( is_wp_error( $term_ids ) || ! is_array( $term_ids ) ) {
+				continue;
+			}
+			$this->bulk_upsert( $term_ids, 'term', $collection_name );
 			$reindexed_count += count( $term_ids );
 		}
 		return $reindexed_count;
@@ -143,15 +170,18 @@ class Collection {
 	 * Process data in batches
 	 *
 	 * @param string $hook Action hook name.
-	 * @param array  $entity_ids Entity IDs.
-	 * @param array  $args Additional arguments.
+	 * @param array  $ids IDs.
+	 * @param mixed  ...$args Additional arguments.
 	 */
-	private static function batch_process( $hook, $entity_ids, $args ) {
-		foreach ( array_chunk( $entity_ids, WP_TYPESENSE_BATCH_SIZE ) as $batch ) {
+	private function batch_process( $hook, $ids, ...$args ) {
+		if ( empty( $ids ) ) {
+			return;
+		}
+		foreach ( array_chunk( $ids, WP_TYPESENSE_BATCH_SIZE ) as $batch ) {
 			if ( function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( $hook, array( $batch, $args ) );
+				as_enqueue_async_action( $hook, array( $batch, ...$args ) );
 			} else {
-				do_action( $hook, $batch, $args );
+				do_action( $hook, $batch, ...$args );
 			}
 		}
 	}
