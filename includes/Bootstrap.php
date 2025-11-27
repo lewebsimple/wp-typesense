@@ -12,22 +12,38 @@ class Bootstrap {
 	 * @var Bootstrap $instance
 	 */
 	public static ?Bootstrap $instance = null;
+
+	/**
+	 * Get singleton instance
+	 *
+	 * @return Bootstrap
+	 */
 	public static function get_instance() {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
+	/**
+	 * Initialize bootstrap hooks
+	 */
 	public function __construct() {
 		$this->autoload();
 		add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
 	}
 
+	/**
+	 * Load Composer autoloader
+	 */
 	public function autoload() {
 		require_once WP_TYPESENSE_ROOT_DIR_PATH . '/vendor/autoload.php';
 	}
 
+	/**
+	 * Initialize plugin classes
+	 */
 	public function init_plugin() {
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 		API::get_instance();
+		Collection::get_instance();
 		Document::get_instance();
 		Hooks::get_instance();
 		Schemas::get_instance();
@@ -35,6 +51,9 @@ class Bootstrap {
 		WPCLI::get_instance();
 	}
 
+	/**
+	 * Load plugin text domain for translations
+	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'wp-typesense', false, dirname( WP_TYPESENSE_BASENAME ) . '/languages' );
 	}

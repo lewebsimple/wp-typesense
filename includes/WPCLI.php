@@ -15,14 +15,26 @@ class WPCLI {
 	 * @var WPCLI $instance
 	 */
 	public static ?WPCLI $instance = null;
+
+	/**
+	 * Get singleton instance
+	 *
+	 * @return WPCLI
+	 */
 	public static function get_instance() {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
+	/**
+	 * Initialize WP-CLI hooks
+	 */
 	public function __construct() {
 		add_action( 'cli_init', array( $this, 'register_commands' ) );
 	}
 
+	/**
+	 * Register WP-CLI commands
+	 */
 	public function register_commands() {
 		WP_CLI::add_command( 'typesense info', array( $this, 'info' ), );
 		WP_CLI::add_command( 'typesense collection drop', array( $this, 'collection_drop' ), );
@@ -31,6 +43,9 @@ class WPCLI {
 		WP_CLI::add_command( 'typesense collection reindex', array( $this, 'collection_reindex' ), );
 	}
 
+	/**
+	 * Display Typesense server information
+	 */
 	public function info() {
 		try {
 			API::get_client()->getHealth();
@@ -42,6 +57,11 @@ class WPCLI {
 		}
 	}
 
+	/**
+	 * Drop a Typesense collection
+	 *
+	 * @param array $args Command arguments.
+	 */
 	public function collection_drop( $args ) {
 		if ( empty( $collection_name = $args[0] ?? '' ) ) {
 			WP_CLI::error( 'Collection name is required.' );
@@ -55,6 +75,9 @@ class WPCLI {
 		}
 	}
 
+	/**
+	 * List all Typesense collections
+	 */
 	public function collection_list() {
 		try {
 			$collections = API::get_client()->collections->retrieve();
@@ -76,24 +99,34 @@ class WPCLI {
 		}
 	}
 
+	/**
+	 * Prune invalid documents from a collection
+	 *
+	 * @param array $args Command arguments.
+	 */
 	public function collection_prune( $args ) {
 		if ( empty( $collection_name = $args[0] ?? '' ) ) {
 			WP_CLI::error( 'Collection name is required.' );
 		}
 		try {
-			$deleted_count = Document::prune_collection( $collection_name );
+			$deleted_count = Collection::prune( $collection_name );
 			WP_CLI::success( sprintf( 'Pruned %d documents from collection "%s" successfully.', $deleted_count, $collection_name ) );
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Failed to prune collection: %s', $e->getMessage() ) );
 		}
 	}
 
+	/**
+	 * Reindex all documents in a collection
+	 *
+	 * @param array $args Command arguments.
+	 */
 	public function collection_reindex( $args ) {
 		if ( empty( $collection_name = $args[0] ?? '' ) ) {
 			WP_CLI::error( 'Collection name is required.' );
 		}
 		try {
-			$reindexed_count = Document::reindex_collection( $collection_name );
+			$reindexed_count = Collection::reindex( $collection_name );
 			WP_CLI::success( sprintf( 'Reindexed %d documents from collection "%s" successfully.', $reindexed_count, $collection_name ) );
 		} catch ( Exception $e ) {
 			WP_CLI::error( sprintf( 'Failed to reindex collection: %s', $e->getMessage() ) );

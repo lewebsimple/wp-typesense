@@ -12,10 +12,19 @@ class Hooks {
 	 * @var Hooks $instance
 	 */
 	public static ?Hooks $instance = null;
+
+	/**
+	 * Get singleton instance
+	 *
+	 * @return Hooks
+	 */
 	public static function get_instance() {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
+	/**
+	 * Initialize synchronization hooks
+	 */
 	public function __construct() {
 		// Posts
 		add_action( 'wp_after_insert_post', array( $this, 'post_updated' ) );
@@ -30,6 +39,11 @@ class Hooks {
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'post_updated' ) );
 	}
 
+	/**
+	 * Handle post update event
+	 *
+	 * @param WP_Post|WC_Product|int $post Post object, product object, or post ID.
+	 */
 	public function post_updated( $post ) {
 		if ( is_a( $post, 'WP_Post' ) ) {
 			$post_id = $post->ID;
@@ -44,10 +58,10 @@ class Hooks {
 		try {
 			foreach ( Schemas::get_post_collections( $post_id ) as $collection_name ) {
 				if ( $should_remove ) {
-					$document_id = Document::encode_document_id( $collection_name, 'post', $post_id );
+					$document_id = Document::encode_id( $collection_name, 'post', $post_id );
 					API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 				} else {
-					$document = Document::get_document_data( $collection_name, 'post', $post_id );
+					$document = Document::get_data( $collection_name, 'post', $post_id );
 					if ( is_wp_error( $document ) ) {
 						continue;
 					}
@@ -59,10 +73,15 @@ class Hooks {
 		}
 	}
 
+	/**
+	 * Handle post deletion event
+	 *
+	 * @param int $post_id Post ID.
+	 */
 	public function post_deleted( $post_id ) {
 		try {
 			foreach ( Schemas::get_post_collections( $post_id ) as $collection_name ) {
-				$document_id = Document::encode_document_id( $collection_name, 'post', $post_id );
+				$document_id = Document::encode_id( $collection_name, 'post', $post_id );
 				API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 			}
 		} catch ( \Exception $e ) {
@@ -70,10 +89,15 @@ class Hooks {
 		}
 	}
 
+	/**
+	 * Handle term update event
+	 *
+	 * @param int $term_id Term ID.
+	 */
 	public function term_updated( $term_id ) {
 		try {
 			foreach ( Schemas::get_term_collections( $term_id ) as $collection_name ) {
-				$document = Document::get_document_data( $collection_name, 'term', $term_id );
+				$document = Document::get_data( $collection_name, 'term', $term_id );
 				if ( is_wp_error( $document ) ) {
 					continue;
 				}
@@ -84,10 +108,15 @@ class Hooks {
 		}
 	}
 
+	/**
+	 * Handle term deletion event
+	 *
+	 * @param int $term_id Term ID.
+	 */
 	public function term_deleted( $term_id ) {
 		try {
 			foreach ( Schemas::get_term_collections( $term_id ) as $collection_name ) {
-				$document_id = Document::encode_document_id( $collection_name, 'term', $term_id );
+				$document_id = Document::encode_id( $collection_name, 'term', $term_id );
 				API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 			}
 		} catch ( \Exception $e ) {

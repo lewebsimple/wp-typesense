@@ -35,14 +35,30 @@ class Schemas {
 	 * @var Schemas $instance
 	 */
 	public static ?Schemas $instance = null;
+
+	/**
+	 * Get singleton instance
+	 *
+	 * @return Schemas
+	 */
 	public static function get_instance() {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
+	/**
+	 * Initialize schema hooks
+	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
 	}
 
+	/**
+	 * Initialize and synchronize collection schemas
+	 *
+	 * @throws \Exception Invalid schema definition.
+	 *
+	 * @return void
+	 */
 	public function init() {
 		foreach ( apply_filters( 'wp_typesense_schemas', array() ) as $collection_name => $schema ) {
 			if ( $collection_name !== $schema['name'] ) {
@@ -76,16 +92,39 @@ class Schemas {
 		}
 	}
 
+	/**
+	 * Get collections associated with a post
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return array
+	 */
 	public static function get_post_collections( $post_id ) {
 		$post_type = get_post_type( $post_id );
 		return self::get_instance()->post_types_map[ $post_type ] ?? array();
 	}
 
+	/**
+	 * Get collections associated with a term
+	 *
+	 * @param int $term_id Term ID.
+	 *
+	 * @return array
+	 */
 	public static function get_term_collections( $term_id ) {
 		$taxonomy = get_term( $term_id )->taxonomy ?? '';
 		return self::get_instance()->taxonomies_map[ $taxonomy ] ?? array();
 	}
 
+	/**
+	 * Synchronize schema with Typesense server
+	 *
+	 * @param array $schema Collection schema.
+	 *
+	 * @throws \Exception Synchronization error.
+	 *
+	 * @return array|\WP_Error
+	 */
 	private function sync_schema( $schema ) {
 		$collection_name = $schema['name'] ?? '(unknown)';
 		try {
