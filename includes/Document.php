@@ -23,13 +23,6 @@ class Document {
 	}
 
 	/**
-	 * Initialize document hooks
-	 */
-	public function __construct() {
-		add_action( 'wp_typesense_bulk_upsert', array( $this, 'bulk_upsert' ), 10, 2 );
-	}
-
-	/**
 	 * Encode document ID
 	 *
 	 * @param string $collection_name Collection name.
@@ -82,24 +75,5 @@ class Document {
 		}
 		$document['id'] = self::encode_id( $collection_name, $entity_type, $entity_id );
 		return $document;
-	}
-
-	/**
-	 * Bulk upsert documents to Typesense
-	 *
-	 * @param array $entity_ids Entity IDs.
-	 * @param array $args Additional arguments: collection_name, entity_type.
-	 */
-	public function bulk_upsert( $entity_ids, $args ) {
-		if ( empty( $args['collection_name'] ) || empty( $args['entity_type'] ) || empty( $entity_ids ) ) {
-			return;
-		}
-		$documents = array_map(
-			function ( $entity_id ) use ( $args ) {
-				return Document::get_instance()->get_data( $args['collection_name'], $args['entity_type'], $entity_id );
-			},
-			$entity_ids
-		);
-		API::get_client()->collections[ $args['collection_name'] ]->documents->import( API::jsonl_encode( $documents ), array( 'action' => 'upsert' ) );
 	}
 }

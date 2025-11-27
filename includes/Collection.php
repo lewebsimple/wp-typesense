@@ -23,6 +23,32 @@ class Collection {
 		return is_null( self::$instance ) ? self::$instance = new self() : self::$instance;
 	}
 
+	/**
+	 * Initialize collection hooks
+	 */
+	public function __construct() {
+		add_action( 'wp_typesense_bulk_upsert', array( $this, 'bulk_upsert' ), 10, 2 );
+	}
+
+
+	/**
+	 * Bulk upsert documents to Typesense
+	 *
+	 * @param array $entity_ids Entity IDs.
+	 * @param array $args Additional arguments: collection_name, entity_type.
+	 */
+	public function bulk_upsert( $entity_ids, $args ) {
+		if ( empty( $args['collection_name'] ) || empty( $args['entity_type'] ) || empty( $entity_ids ) ) {
+			return;
+		}
+		$documents = array_map(
+			function ( $entity_id ) use ( $args ) {
+				return Document::get_instance()->get_data( $args['collection_name'], $args['entity_type'], $entity_id );
+			},
+			$entity_ids
+		);
+		API::get_client()->collections[ $args['collection_name'] ]->documents->import( API::jsonl_encode( $documents ), array( 'action' => 'upsert' ) );
+	}
 
 	/**
 	 * Remove invalid documents from a collection
@@ -84,10 +110,10 @@ class Collection {
 			);
 			self::batch_process(
 				'wp_typesense_bulk_upsert',
+				$post_ids,
 				array(
 					'collection_name' => $collection_name,
 					'entity_type'     => 'post',
-					'entity_ids'      => $post_ids,
 				),
 			);
 			$reindexed_count += count( $post_ids );
@@ -102,10 +128,10 @@ class Collection {
 			);
 			self::batch_process(
 				'wp_typesense_bulk_upsert',
+				$term_ids,
 				array(
 					'collection_name' => $collection_name,
 					'entity_type'     => 'term',
-					'entity_ids'      => $term_ids,
 				),
 			);
 			$reindexed_count += count( $term_ids );
@@ -117,14 +143,15 @@ class Collection {
 	 * Process data in batches
 	 *
 	 * @param string $hook Action hook name.
-	 * @param array  $data Data to process.
+	 * @param array  $entity_ids Entity IDs.
+	 * @param array  $args Additional arguments.
 	 */
-	private static function batch_process( $hook, $data ) {
-		foreach ( array_chunk( $data, WP_TYPESENSE_BATCH_SIZE ) as $batch ) {
+	private static function batch_process( $hook, $entity_ids, $args ) {
+		foreach ( array_chunk( $entity_ids, WP_TYPESENSE_BATCH_SIZE ) as $batch ) {
 			if ( function_exists( 'as_enqueue_async_action' ) ) {
-				as_enqueue_async_action( $hook, array( $batch ) );
+				as_enqueue_async_action( $hook, array( $batch, $args ) );
 			} else {
-				do_action( $hook, $batch );
+				do_action( $hook, $batch, $args );
 			}
 		}
 	}
