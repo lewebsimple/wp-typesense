@@ -69,7 +69,7 @@ class Hooks {
 				}
 			}
 		} catch ( \Exception $e ) {
-			return;
+			Bootstrap::admin_notice( sprintf( __( 'Error updating post ID %1$d in collection "%2$s": %3$s', 'wp-typesense' ), $post_id, $collection_name, $e->getMessage() ) );
 		}
 	}
 
@@ -85,7 +85,7 @@ class Hooks {
 				API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 			}
 		} catch ( \Exception $e ) {
-			return;
+			Bootstrap::admin_notice( sprintf( __( 'Error deleting post ID %1$d from collection "%2$s": %3$s', 'wp-typesense' ), $post_id, $collection_name, $e->getMessage() ) );
 		}
 	}
 
@@ -104,7 +104,7 @@ class Hooks {
 				API::get_client()->collections[ $collection_name ]->documents->upsert( $document );
 			}
 		} catch ( \Exception $e ) {
-			return;
+			Bootstrap::admin_notice( sprintf( __( 'Error updating term ID %1$d in collection "%2$s": %3$s', 'wp-typesense' ), $term_id, $collection_name, $e->getMessage() ) );
 		}
 	}
 
@@ -120,7 +120,7 @@ class Hooks {
 				API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 			}
 		} catch ( \Exception $e ) {
-			return;
+			Bootstrap::admin_notice( sprintf( __( 'Error deleting term ID %1$d from collection "%2$s": %3$s', 'wp-typesense' ), $term_id, $collection_name, $e->getMessage() ) );
 		}
 	}
 }

@@ -180,16 +180,7 @@ class Schemas {
 
 			return $result;
 		} catch ( \Exception $e ) {
-			add_action(
-				'admin_notices',
-				function () use ( $e, $collection_name ) {
-					printf(
-						'<div class="notice notice-error is-dismissible"><p><strong>WP Typesense error</strong> (%s): %s</p></div>',
-						esc_html( $collection_name ),
-						esc_html( $e->getMessage() ),
-					);
-				}
-			);
+			Bootstrap::admin_notice( sprintf( __( 'Error synchronizing schema for collection "%1$s": %2$s', 'wp-typesense' ), $collection_name, $e->getMessage() ) );
 			return new \WP_Error( 'sync_schema_error', $e->getMessage() );
 		}
 	}

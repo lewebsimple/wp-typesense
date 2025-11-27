@@ -57,6 +57,23 @@ class Bootstrap {
 	public function load_textdomain() {
 		load_plugin_textdomain( 'wp-typesense', false, dirname( WP_TYPESENSE_BASENAME ) . '/languages' );
 	}
+
+	/**
+	 * Display an admin notice with the given message
+	 *
+	 * @param string $message The message to display.
+	 */
+	public static function admin_notice( $message ) {
+		if ( ! is_admin() ) {
+			return;
+		}
+		add_action(
+			'admin_notices',
+			function () use ( $message ) {
+				echo '<div class="notice notice-error"><p><strong>WP Typesense error</strong>:' . esc_html( $message ) . '</p></div>';
+			}
+		);
+	}
 }
 
 Bootstrap::get_instance();
