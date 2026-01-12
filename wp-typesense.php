@@ -3,7 +3,7 @@
  * Plugin Name: WP Typesense
  * Plugin URI: https://github.com/lewebsimple/wp-typesense
  * Description: Low-level Typesense integration for WordPress.
- * Version: 0.3.4
+ * Version: 0.3.5
  * Author: Pascal Martineau <pascal@lewebsimple.ca>
  * Author URI: https://websimple.com
  * License: MIT
