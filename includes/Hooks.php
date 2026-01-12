@@ -37,6 +37,7 @@ class Hooks {
 		// WooCommerce
 		add_action( 'woocommerce_product_set_stock', array( $this, 'post_updated' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'post_updated' ) );
+		add_action( 'wc_after_products_ending_sales', array( $this, 'posts_updated' ) );
 	}
 
 	/**
@@ -74,53 +75,63 @@ class Hooks {
 	}
 
 	/**
+	 * Handle multiple posts update event
+	 *
+	 * @param int[] $post_ids Array of post IDs.
+	 */ public function posts_updated( $post_ids ) {
+		foreach ( $post_ids as $post_id ) {
+			$this->post_updated( $post_id );
+		}
+}
+
+	/**
 	 * Handle post deletion event
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	public function post_deleted( $post_id ) {
-		try {
-			foreach ( Schemas::get_post_collections( $post_id ) as $collection_name ) {
-				$document_id = Document::encode_id( $collection_name, 'post', $post_id );
-				API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
-			}
-		} catch ( \Exception $e ) {
-			Notice::error( sprintf( __( 'Error deleting post ID %1$d from collection "%2$s": %3$s', 'wp-typesense' ), $post_id, $collection_name, $e->getMessage() ) );
+public function post_deleted( $post_id ) {
+	try {
+		foreach ( Schemas::get_post_collections( $post_id ) as $collection_name ) {
+			$document_id = Document::encode_id( $collection_name, 'post', $post_id );
+			API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 		}
+	} catch ( \Exception $e ) {
+		Notice::error( sprintf( __( 'Error deleting post ID %1$d from collection "%2$s": %3$s', 'wp-typesense' ), $post_id, $collection_name, $e->getMessage() ) );
 	}
+}
 
 	/**
 	 * Handle term update event
 	 *
 	 * @param int $term_id Term ID.
 	 */
-	public function term_updated( $term_id ) {
-		try {
-			foreach ( Schemas::get_term_collections( $term_id ) as $collection_name ) {
-				$document = Document::get_data( $collection_name, 'term', $term_id );
-				if ( is_wp_error( $document ) ) {
-					continue;
-				}
-				API::get_client()->collections[ $collection_name ]->documents->upsert( $document );
+public function term_updated( $term_id ) {
+	try {
+		foreach ( Schemas::get_term_collections( $term_id ) as $collection_name ) {
+			$document = Document::get_data( $collection_name, 'term', $term_id );
+			if ( is_wp_error( $document ) ) {
+				continue;
 			}
-		} catch ( \Exception $e ) {
-			Notice::error( sprintf( __( 'Error updating term ID %1$d in collection "%2$s": %3$s', 'wp-typesense' ), $term_id, $collection_name, $e->getMessage() ) );
+			API::get_client()->collections[ $collection_name ]->documents->upsert( $document );
 		}
+	} catch ( \Exception $e ) {
+		Notice::error( sprintf( __( 'Error updating term ID %1$d in collection "%2$s": %3$s', 'wp-typesense' ), $term_id, $collection_name, $e->getMessage() ) );
 	}
+}
 
 	/**
 	 * Handle term deletion event
 	 *
 	 * @param int $term_id Term ID.
 	 */
-	public function term_deleted( $term_id ) {
-		try {
-			foreach ( Schemas::get_term_collections( $term_id ) as $collection_name ) {
-				$document_id = Document::encode_id( $collection_name, 'term', $term_id );
-				API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
-			}
-		} catch ( \Exception $e ) {
-			Notice::error( sprintf( __( 'Error deleting term ID %1$d from collection "%2$s": %3$s', 'wp-typesense' ), $term_id, $collection_name, $e->getMessage() ) );
+public function term_deleted( $term_id ) {
+	try {
+		foreach ( Schemas::get_term_collections( $term_id ) as $collection_name ) {
+			$document_id = Document::encode_id( $collection_name, 'term', $term_id );
+			API::get_client()->collections[ $collection_name ]->documents[ $document_id ]->delete();
 		}
+	} catch ( \Exception $e ) {
+		Notice::error( sprintf( __( 'Error deleting term ID %1$d from collection "%2$s": %3$s', 'wp-typesense' ), $term_id, $collection_name, $e->getMessage() ) );
 	}
+}
 }
